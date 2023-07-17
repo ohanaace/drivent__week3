@@ -1,7 +1,7 @@
 import { prisma } from '@/config';
 
 export function getHotels() {
-    return prisma.hotel.findMany();
+    return prisma.hotel.findMany({});
 };
 
 export function getHotelsRooms(id: number){

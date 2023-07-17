@@ -64,6 +64,8 @@ describe('GET /hotels - when token is valid', () => {
         expect(response.status).toBe(httpStatus.NOT_FOUND);    
     });
 
+    
+
     it('should respond with status 200 if there are listed hotels', async () => {
         const user = await createUser();
         const token = await generateValidToken(user);

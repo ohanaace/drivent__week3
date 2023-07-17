@@ -1,8 +1,7 @@
 import * as hotelRepositories from "@/repositories/hotels-repository";
-import { notFoundError } from "@/errors";
+import { notFoundError, paymentRequiredError } from "@/errors";
 import ticketsRepository from "@/repositories/tickets-repository";
 import enrollmentRepository from "@/repositories/enrollment-repository";
-import { paymentRequiredError } from "@/errors/payment-required-error";
 
 export async function getHotels(userId: number){
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
