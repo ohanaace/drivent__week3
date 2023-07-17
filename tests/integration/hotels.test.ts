@@ -15,10 +15,12 @@ import * as jwt from 'jsonwebtoken';
 import { Enrollment, Hotel, Room, TicketStatus, User } from '@prisma/client';
 
 beforeAll(async () => {
-  await init();
-  await cleanDb();
-});
-
+    await init();
+  });
+  
+  beforeEach(async () => {
+    await cleanDb();
+  });
 const server = supertest(app);
 
 describe('GET /hotels - authorization issues', () => {
