@@ -13,9 +13,9 @@ export async function getHotels(userId: number){
   if(!ticket){
     throw notFoundError();
   };
-  if(ticket.status !== 'PAID' 
+  if(ticket.status === 'RESERVED' 
     || ticket.TicketType.isRemote 
-    || ticket.TicketType.includesHotel === false){
+    || !ticket.TicketType.includesHotel){
       throw paymentRequiredError();
   };
   const result = await hotelRepositories.getHotels();
@@ -34,7 +34,7 @@ export async function getHotelsRooms(id: number, userId: number) {
     if(!ticket){
       throw notFoundError();
     };
-    if(ticket.status !== 'PAID' 
+    if(ticket.status === 'RESERVED' 
       || ticket.TicketType.isRemote 
       || ticket.TicketType.includesHotel === false){
         throw paymentRequiredError();
