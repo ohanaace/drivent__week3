@@ -4,10 +4,10 @@ export function getHotels() {
     return prisma.hotel.findMany({});
 };
 
-export function getHotelsRooms(id: number){
-    return prisma.hotel.findUnique({
+export function getHotelsRooms(hotelId: number){
+    return prisma.hotel.findFirst({
         where: {
-            id
+            id: hotelId
         },
         include: {
             Rooms: true

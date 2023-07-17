@@ -3,9 +3,15 @@ import supertest from 'supertest';
 import { cleanDb, generateValidToken } from '../helpers';
 import app, { init } from '@/app';
 import faker from '@faker-js/faker';
-import { createEnrollmentWithAddress, createHotel, createUser } from '../factories';
+import { createEnrollmentWithAddress, 
+    createHotel, 
+    createTicket, 
+    createTicketType, 
+    createTicketTypeRemote, 
+    createTicketWithoutHotel, 
+    createUser } from '../factories';
 import * as jwt from 'jsonwebtoken';
-import { Enrollment, User } from '@prisma/client';
+import { Enrollment, TicketStatus, User } from '@prisma/client';
 
 beforeAll(async () => {
   await init();
@@ -64,7 +70,32 @@ describe('GET /hotels - when token is valid', () => {
         expect(response.status).toBe(httpStatus.NOT_FOUND);    
     });
 
-    
+    it('should respond with status 402 if the ticket status is RESERVED',async () => {
+        const ticketType = await createTicketType();
+        await createTicket(enrollment.id, ticketType.id, TicketStatus.RESERVED);
+
+        const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(httpStatus.PAYMENT_REQUIRED);
+    });
+
+    it('should respond with status 402 if ticket does not include hotel', async () => {
+       const ticketWithoutHotel = await createTicketWithoutHotel();
+       await createTicket(enrollment.id, ticketWithoutHotel.id, TicketStatus.PAID);
+       
+       const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
+
+       expect(response.status).toBe(httpStatus.PAYMENT_REQUIRED);
+    });
+
+    it('should respond with status 402 if ticket event is remote', async () => {
+        const remoteTicket = await createTicketTypeRemote();
+        await createTicket(enrollment.id, remoteTicket.id, TicketStatus.PAID);
+
+        const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
+
+        expect(response.status).toBe(httpStatus.PAYMENT_REQUIRED);
+    })
 
     it('should respond with status 200 if there are listed hotels', async () => {
         const user = await createUser();

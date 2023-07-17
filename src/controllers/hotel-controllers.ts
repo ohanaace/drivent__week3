@@ -22,9 +22,9 @@ export async function getHotels(req: AuthenticatedRequest, res: Response) {
 
 export async function getHotelsRooms(req: AuthenticatedRequest, res: Response) {
     try {
-        const id = Number(req.params.hotelId);
+        const hotelId = Number(req.params.hotelId);
         const { userId } = req
-        const hotel = await hotelsService.getHotelsRooms(id, userId);
+        const hotel = await hotelsService.getHotelsRooms(hotelId, userId);
         res.send(hotel);
     } catch (error) {
         if (error.name === 'NotFoundError') {
