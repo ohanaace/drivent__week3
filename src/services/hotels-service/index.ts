@@ -18,7 +18,7 @@ export async function getHotels(userId: number){
     || ticket.TicketType.includesHotel === false) throw paymentRequiredError();
  
     const result = await hotelRepositories.getHotels();
-    if(result.length === 0){
+    if(result.length === 0 || !result || result === null){
       throw notFoundError();
     };
   return result;
