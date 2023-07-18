@@ -10,6 +10,7 @@ import {
     createTicket,
     createTicketType,
     createTicketTypeRemote,
+    createTicketTypeWithHotel,
     createTicketWithoutHotel,
     createUser
 } from '../factories';
@@ -66,7 +67,7 @@ describe('GET /hotels - when token is valid', () => {
     });
     it('should respond with status 404 if ticket doesnt exist', async () => {
 
-        const response = await server.get('/tickets/types').set('Authorization', `Bearer ${token}`)
+        const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`)
 
         expect(response.status).toBe(httpStatus.NOT_FOUND);
     });
@@ -103,14 +104,20 @@ describe('GET /hotels - when token is valid', () => {
     })
 
     it('should respond with status 200 if there are listed hotels', async () => {
-        const user = await createUser();
-        const token = await generateValidToken(user);
-
-        await createHotel()
+        const validTicket = await createTicketTypeWithHotel();
+        await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
+        const hotel = await createHotel()
 
         const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(httpStatus.OK);
+        expect(response.body).toEqual([{
+            id: hotel.id,
+            name: hotel.name,
+            image: hotel.image,
+            createdAt: hotel.createdAt.toISOString(),
+            updatedAt: hotel.updatedAt.toISOString()
+        }])
     });
 });
 
@@ -120,7 +127,7 @@ describe('GET /hotels/:hotelId - authorization issues', () => {
         hotel = await createHotel()
     });
     it('should respond with status 401 if no token is given', async () => {
-        const response = await server.get(`${hotel.id}`);
+        const response = await server.get(`/hotels/${hotel.id}`);
 
         expect(response.status).toBe(httpStatus.UNAUTHORIZED);
     });
@@ -162,7 +169,7 @@ describe('GET /hotels/:hotelId - when token is valid', () => {
     });
     it('should respond with status 404 if ticket doesnt exist', async () => {
 
-        const response = await server.get('/tickets/types').set('Authorization', `Bearer ${token}`)
+        const response = await server.get('/hotels').set('Authorization', `Bearer ${token}`)
 
         expect(response.status).toBe(httpStatus.NOT_FOUND);
     });
@@ -199,13 +206,29 @@ describe('GET /hotels/:hotelId - when token is valid', () => {
     })
 
     it('should respond with status 200 if there are listed hotels', async () => {
-        const user = await createUser();
-        const token = await generateValidToken(user);
 
-        await createHotel()
+        const validTicket = await createTicketTypeWithHotel();
+        await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
 
         const response = await server.get(`/hotels/${hotel.id}`).set('Authorization', `Bearer ${token}`);
 
         expect(response.status).toBe(httpStatus.OK);
+        expect(response.body).toEqual({
+            id: hotel.id,
+            name: hotel.name,
+            image: hotel.image,
+            createdAt: hotel.createdAt.toISOString(),
+            updatedAt: hotel.updatedAt.toISOString(),
+
+            Rooms: [
+                {
+                    id: rooms.id,
+                    name: rooms.name,
+                    hotelId: hotel.id,
+                    capacity: rooms.capacity,
+                    createdAt: rooms.createdAt.toISOString(),
+                    updatedAt: rooms.updatedAt.toISOString()
+        }]
+        })
     });
 });

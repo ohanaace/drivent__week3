@@ -6,7 +6,7 @@ const hotelRouter = Router();
 
 hotelRouter
     .all('/*', authenticateToken)
-    .get('/hotels', hotelsControllers.getHotels)
-    .get('/hotels/:hotelId', hotelsControllers.getHotelsRooms);
+    .get('/', hotelsControllers.getHotels)
+    .get('/:hotelId', hotelsControllers.getHotelsRooms);
 
 export { hotelRouter };

@@ -7,12 +7,10 @@ import { TicketStatus } from "@prisma/client";
 export async function getHotels(userId: number){
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
   if(!enrollment){
-    console.log('throw enrollment')
     throw notFoundError();
   }
   const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
   if(!ticket){
-    console.log('throw ticket')
     throw notFoundError();
   };
   if(ticket.status === TicketStatus.RESERVED
@@ -29,13 +27,11 @@ export async function getHotels(userId: number){
 export async function getHotelsRooms(hotelId: number, userId: number) {
     const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
     if(!enrollment){
-      console.log('throw enrollment id')
       throw notFoundError();
       
     }
     const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
     if(!ticket){
-      console.log('throw ticket id')
       throw notFoundError();
     };
     if(ticket.status === TicketStatus.RESERVED 

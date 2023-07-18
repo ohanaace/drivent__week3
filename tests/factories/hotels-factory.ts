@@ -13,7 +13,7 @@ export async function createHotel(){
 export async function createHotelWithRooms(hotelId: number){
     return await prisma.room.create({
         data: {
-            name: faker.name.lastName(),
+            name: faker.datatype.number().toString(),
             capacity: faker.datatype.number(),
             hotelId
         }
