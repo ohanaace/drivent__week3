@@ -12,6 +12,7 @@ import {
 import * as jwt from "jsonwebtoken";
 import { cleanDb, generateValidToken } from "../helpers";
 import { Enrollment, Hotel, Room, TicketStatus, User } from "@prisma/client";
+import { any } from "joi";
 
 const server = supertest(app);
 
@@ -76,4 +77,31 @@ describe("GET method /booking => When token is valid", () => {
 
         expect(body).toHaveProperty('id', booking.id);
     });
+});
+
+describe("POST method /booking", () => {
+    let token: string;
+    let user: User;
+    let enrollment: Enrollment;
+    let hotel: Hotel;
+    let rooms: Room;
+    beforeEach(async () => {
+        hotel = await createHotel()
+        user = await createUser();
+        token = await generateValidToken(user);
+        enrollment = await createEnrollmentWithAddress(user)
+        rooms = await createHotelWithRooms(hotel.id)
+    });
+
+    it('should respond with status 200 and bookingId if user books a room',async () => {
+        const validTicket = await createTicketTypeWithHotel();
+        await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
+        const body = {
+            roomId: rooms.id
+        }
+        const result = await server.post("/booking").set("Authorization", `Bearer ${token}`).send(body);
+
+        expect(result.status).toBe(httpStatus.OK);
+        expect(result.body).toHaveProperty('bookingId');
+    })
 });

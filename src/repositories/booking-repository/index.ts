@@ -48,3 +48,12 @@ export function getReservations(roomId: number){
         }
     });
 }
+
+const bookingRepository = {
+    createBooking,
+    updateBooking,
+    getBooking,
+    getRoomsInfo
+}
+
+export default bookingRepository;
