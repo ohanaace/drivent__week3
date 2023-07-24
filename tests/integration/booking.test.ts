@@ -7,11 +7,12 @@ import {
     createHotel, createHotelWithRooms,
     createReservation, createTicket,
     createTicketTypeWithHotel,
-    createUser
+    createUser,
+    getRoomCapacity
 } from "../factories";
 import * as jwt from "jsonwebtoken";
 import { cleanDb, generateValidToken } from "../helpers";
-import { Enrollment, Hotel, Room, TicketStatus, User } from "@prisma/client";
+import { Booking, Enrollment, Hotel, Room, TicketStatus, User } from "@prisma/client";
 import { any } from "joi";
 
 const server = supertest(app);
@@ -120,6 +121,61 @@ describe("POST method /booking", () => {
             roomId: rooms.id
         }
         const result = await server.post("/booking").set("Authorization", `Bearer ${token}`).send(body);
+
+        expect(result.status).toBe(httpStatus.OK);
+        expect(result.body).toHaveProperty('bookingId');
+    });
+});
+
+describe("PUT method /booking/:bookingId", () => {
+    let token: string;
+    let user: User;
+    let enrollment: Enrollment;
+    let hotel: Hotel;
+    let rooms: Room;
+    let booking: Booking
+    beforeEach(async () => {
+        hotel = await createHotel()
+        user = await createUser();
+        token = await generateValidToken(user);
+        enrollment = await createEnrollmentWithAddress(user);
+        rooms = await createHotelWithRooms(hotel.id);
+        booking = await createReservation(rooms.id, user.id);
+    });
+
+    it('should respond with status 400 if no body is given', async () => {
+       const validTicket = await createTicketTypeWithHotel();
+       await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
+       
+       const result = await server.put(`/booking/${booking.id}`).set("Authorization", `Bearer ${token}`);
+
+       expect(result.status).toBe(httpStatus.BAD_REQUEST);
+    });
+
+    it('should respond with status 404 if new room id does not exist', async () => {
+        const validTicket = await createTicketTypeWithHotel();
+        await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
+
+        const body = {
+            roomId: 0
+        };
+
+        const result = await server.put(`/booking/${booking.id}`).set("Authorization", `Bearer ${token}`).send(body);
+
+        expect(result.status).toBe(httpStatus.NOT_FOUND);
+    });
+
+    it('should respond with status 200 and new bookingId if user updates booking',async () => {
+        const newRoom = await createHotelWithRooms(hotel.id);
+
+        const validTicket = await createTicketTypeWithHotel();
+        await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
+
+        const body = {
+            roomId: newRoom.id
+        };
+
+        const result = await server.put(`/booking/${booking.id}`).set("Authorization", `Bearer ${token}`).send(body);
 
         expect(result.status).toBe(httpStatus.OK);
         expect(result.body).toHaveProperty('bookingId');
