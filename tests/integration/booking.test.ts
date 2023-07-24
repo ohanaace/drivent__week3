@@ -74,6 +74,6 @@ describe("GET method /booking => When token is valid", () => {
 
         expect(status).toBe(httpStatus.OK);
 
-        expect(body).toHaveProperty('id', booking.id)
+        expect(body).toHaveProperty('id', booking.id);
     });
 });
