@@ -17,7 +17,7 @@ export async function createBooking(roomId: number, userId: number){
     const reservations = await bookingRepository.getReservations(roomId);
     if(room.capacity <= reservations) throw forbiddenError();
     const response = await bookingRepository.createBooking(roomId, userId);
-    const booking = {bookingId: response.id}
+    const booking = {bookingId: response.id};
     return booking;
 };
 
@@ -29,7 +29,7 @@ export async function updateBooking(roomId: number, userId: number, bookingId: n
     const capacity = await bookingRepository.getReservations(roomId);
     if(room.capacity <= capacity) throw forbiddenError()
     const response = await bookingRepository.updateBooking(roomId, bookingId);
-    const booking = {bookingId: response.id}
+    const booking = {bookingId: response.id};
     return booking;
 };
 

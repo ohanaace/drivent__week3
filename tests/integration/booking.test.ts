@@ -2,10 +2,16 @@ import supertest from "supertest";
 import app, { init } from "@/app";
 import httpStatus from "http-status";
 import faker from "@faker-js/faker";
-import { createEnrollmentWithAddress, createUser } from "../factories";
+import {
+    createEnrollmentWithAddress,
+    createHotel, createHotelWithRooms,
+    createReservation, createTicket,
+    createTicketTypeWithHotel,
+    createUser
+} from "../factories";
 import * as jwt from "jsonwebtoken";
 import { cleanDb, generateValidToken } from "../helpers";
-import { Enrollment, User } from "@prisma/client";
+import { Enrollment, Hotel, Room, TicketStatus, User } from "@prisma/client";
 
 const server = supertest(app);
 
@@ -40,3 +46,34 @@ describe("GET method /booking => Authorization issues", () => {
     });
 });
 
+describe("GET method /booking => When token is valid", () => {
+    let token: string;
+    let user: User;
+    let enrollment: Enrollment;
+    let hotel: Hotel;
+    let rooms: Room;
+    beforeEach(async () => {
+        hotel = await createHotel()
+        user = await createUser();
+        token = await generateValidToken(user);
+        enrollment = await createEnrollmentWithAddress(user)
+        rooms = await createHotelWithRooms(hotel.id)
+    });
+    it('should respond with status 404 if user has no reservation', async () => {
+        const { status } = await server.get("/booking").set("Authorization", `Bearer ${token}`);
+
+        expect(status).toBe(httpStatus.NOT_FOUND);
+    });
+
+    it('should respond with status 200 and booking info if user has a reservation', async () => {
+        const validTicket = await createTicketTypeWithHotel();
+        const ticket = await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
+        const booking = await createReservation(rooms.id, user.id)
+
+        const { status, body } = await server.get("/booking").set("Authorization", `Bearer ${token}`);
+
+        expect(status).toBe(httpStatus.OK);
+
+        expect(body).toHaveProperty('id', booking.id)
+    });
+});
