@@ -1,4 +1,4 @@
-import { forbiddenError } from "@/errors";
+import { forbiddenError, notFoundError } from "@/errors";
 import * as bookingRepository from "@/repositories/booking-repository";
 import enrollmentRepository from "@/repositories/enrollment-repository";
 import ticketsRepository from "@/repositories/tickets-repository";
@@ -9,10 +9,18 @@ export async function getBooking(userId: number){
    return booking;
 };
 
+interface bookingId {
+    bookingId: number;
+}
 export async function createBooking(roomId: number, userId: number){
     await checkTicket(userId);
-    //TODO: Verificar disponibilidade do quarto
-    await bookingRepository.createBooking();
+    const room = await bookingRepository.getRoomsInfo(roomId);
+    if(!room) throw notFoundError();
+    const reservations = await bookingRepository.getReservations(roomId);
+    if(room.capacity <= reservations) throw forbiddenError();
+    const booking = await bookingRepository.createBooking(roomId, userId);
+   const response = {bookingId: booking.id}
+    return response;
 };
 
 export async function updateBooking(){

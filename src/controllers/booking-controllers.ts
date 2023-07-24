@@ -22,6 +22,7 @@ export async function createBooking(req: AuthenticatedRequest, res: Response) {
         res.status(httpStatus.OK).send(booking);
     } catch (error) {
         if (error.name === 'ForbiddenError') return res.status(httpStatus.FORBIDDEN).send(error.message);
+        res.sendStatus(httpStatus.NOT_FOUND);
     };
 };
 

@@ -1,6 +1,6 @@
 import { prisma } from "@/config";
 
-export async function getBooking(userId: number){
+export function getBooking(userId: number){
     return prisma.booking.findFirst({
         where: {
             userId
@@ -12,10 +12,32 @@ export async function getBooking(userId: number){
     });
 };
 
-export async function createBooking(){
+export function createBooking(roomId: number, userId: number){
+return prisma.booking.create({
+    data: {
+        roomId,
+        userId
+    }
+})
+};
+
+export function updateBooking(){
 
 };
 
-export async function updateBooking(){
 
+export function getRoomsInfo(roomId: number){
+    return prisma.room.findFirst({
+        where: {
+            id: roomId
+        }
+    });
 };
+
+export function getReservations(roomId: number){
+    return prisma.booking.count({
+        where: {
+            roomId
+        }
+    });
+}

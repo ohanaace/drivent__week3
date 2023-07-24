@@ -13,4 +13,4 @@ export function getHotelsRooms(hotelId: number){
             Rooms: true
         }
     });
-}
+};
