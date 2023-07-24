@@ -93,7 +93,27 @@ describe("POST method /booking", () => {
         rooms = await createHotelWithRooms(hotel.id)
     });
 
-    it('should respond with status 200 and bookingId if user books a room',async () => {
+    it('should respond with status 400 if body is not given',async () => {
+        const validTicket = await createTicketTypeWithHotel();
+        await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
+        
+        const result = await server.post("/booking").set("Authorization", `Bearer ${token}`);
+        
+        expect(result.status).toBe(httpStatus.BAD_REQUEST)
+    });
+
+    it('should respond with status 404 if room does not exist',async () => {
+        const validTicket = await createTicketTypeWithHotel();
+        await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
+        const body = {
+            roomId: rooms.id - 2
+        }
+        const result = await server.post("/booking").set("Authorization", `Bearer ${token}`).send(body);
+
+        expect(result.status).toBe(httpStatus.NOT_FOUND)
+    });
+
+    it('should respond with status 200 and bookingId if user books a room', async () => {
         const validTicket = await createTicketTypeWithHotel();
         await createTicket(enrollment.id, validTicket.id, TicketStatus.PAID);
         const body = {
@@ -103,5 +123,5 @@ describe("POST method /booking", () => {
 
         expect(result.status).toBe(httpStatus.OK);
         expect(result.body).toHaveProperty('bookingId');
-    })
+    });
 });
