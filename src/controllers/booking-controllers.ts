@@ -18,6 +18,7 @@ export async function createBooking(req: AuthenticatedRequest, res: Response) {
     try {
         const { roomId } = req.body as CreateBookingBody;
         const { userId } = req;
+        const bookingId = Number(req.params.bookingId);
         const booking = await bookingService.createBooking(roomId, userId);
         res.status(httpStatus.OK).send(booking);
     } catch (error) {
@@ -28,8 +29,13 @@ export async function createBooking(req: AuthenticatedRequest, res: Response) {
 
 export async function updateBooking(req: AuthenticatedRequest, res: Response) {
     try {
-
+        const { roomId } = req.body as CreateBookingBody;
+        const { userId } = req;
+        const bookingId = Number(req.params.bookingId);
+        const booking = await bookingService.updateBooking(roomId, userId, bookingId);
+        res.status(httpStatus.OK).send(booking);
     } catch (error) {
-
+        if (error.name === 'ForbiddenError') return res.status(httpStatus.FORBIDDEN).send(error.message);
+        res.sendStatus(httpStatus.NOT_FOUND);
     };
 };

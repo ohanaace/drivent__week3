@@ -13,7 +13,7 @@ export function getBooking(userId: number){
 };
 
 export function createBooking(roomId: number, userId: number){
-return prisma.booking.create({
+    return prisma.booking.create({
     data: {
         roomId,
         userId
@@ -21,8 +21,15 @@ return prisma.booking.create({
 })
 };
 
-export function updateBooking(){
-
+export function updateBooking(roomId: number, bookingId: number){
+    return prisma.booking.update({
+        where: {
+            id: bookingId,
+        },
+        data: {
+            roomId
+        }
+    })
 };
 
 
